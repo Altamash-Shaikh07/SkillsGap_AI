@@ -1,1 +1,1 @@
-SkillsGap_AI.
+SkillsGap_AI
