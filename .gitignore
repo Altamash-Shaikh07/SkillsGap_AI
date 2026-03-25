@@ -1,1 +1,44 @@
+# Project info (optional ignore)
 PROJECT_INFO/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+
+# Environment variables
+.env
+*.env
+
+# Database / local storage
+chroma_db/
+*.sqlite3
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Node
+node_modules/
+
+# Build files
+dist/
+build/
+
+# Frontend cache
+.vite/
+
+# Optional (good practice)
+.env.local
+.env.development
+.env.production
