@@ -19,11 +19,13 @@
 cd skillgap-ai/backend
 & "C:\Users\YOUR_USERNAME\AppData\Local\Programs\Python\Python311\python.exe" -m venv venv
 .\venv\Scripts\Activate
-pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 copy .env.example .env
 uvicorn main:app --reload --port 8000
+
+http://127.0.0.1:8000/docs
 
 # Frontend (new terminal)
 
