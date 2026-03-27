@@ -1,0 +1,43 @@
+{
+  "AI Engineer": {
+    "required_skills": [
+      "Python", "Machine Learning", "Deep Learning", "TensorFlow", "PyTorch",
+      "Scikit-learn", "NLP", "Computer Vision", "MLOps", "Docker",
+      "REST API", "FastAPI", "NumPy", "Pandas", "Matplotlib",
+      "Transformers", "HuggingFace", "LangChain", "Vector Databases", "SQL"
+    ],
+    "nice_to_have": ["Kubernetes", "AWS", "GCP", "Azure", "Spark", "Kafka"],
+    "description": "Build, train, and deploy AI/ML models at scale"
+  },
+  "Data Scientist": {
+    "required_skills": [
+      "Python", "R", "Statistics", "Machine Learning", "Data Analysis",
+      "Pandas", "NumPy", "Matplotlib", "Seaborn", "SQL",
+      "Tableau", "Power BI", "Scikit-learn", "Feature Engineering",
+      "A/B Testing", "Hypothesis Testing", "Data Visualization", "Excel", "Jupyter"
+    ],
+    "nice_to_have": ["Spark", "Hadoop", "Airflow", "dbt", "Looker"],
+    "description": "Extract insights from data to drive business decisions"
+  },
+  "Full Stack Developer": {
+    "required_skills": [
+      "JavaScript", "TypeScript", "React", "Node.js", "Express",
+      "HTML", "CSS", "TailwindCSS", "MongoDB", "PostgreSQL",
+      "REST API", "GraphQL", "Git", "Docker", "Redux",
+      "JWT", "OAuth", "Webpack", "Vite", "Testing"
+    ],
+    "nice_to_have": ["Next.js", "AWS", "CI/CD", "Microservices", "Redis"],
+    "description": "Build end-to-end web applications with frontend and backend"
+  },
+  "Cybersecurity Analyst": {
+    "required_skills": [
+      "Network Security", "Penetration Testing", "Ethical Hacking", "Linux",
+      "Firewalls", "IDS/IPS", "SIEM", "Vulnerability Assessment",
+      "Python", "Bash", "Wireshark", "Metasploit", "Nmap",
+      "OWASP", "Cryptography", "Incident Response", "Risk Assessment",
+      "SOC", "CEH", "CompTIA Security+"
+    ],
+    "nice_to_have": ["CISSP", "AWS Security", "Threat Intelligence", "Forensics"],
+    "description": "Protect systems and networks from cyber threats"
+  }
+}

@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    background: #0a0d1a;
+    color: #e2e8f0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10;
+  }
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-primary-500/30 active:scale-95;
+  }
+  .btn-ghost {
+    @apply bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium px-6 py-2.5 rounded-xl transition-all duration-200;
+  }
+  .card {
+    @apply glass rounded-2xl p-6;
+  }
+  .skill-badge {
+    @apply text-xs font-mono px-2.5 py-1 rounded-lg font-medium;
+  }
+  .skill-have {
+    @apply skill-badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/20;
+  }
+  .skill-partial {
+    @apply skill-badge bg-amber-500/15 text-amber-400 border border-amber-500/20;
+  }
+  .skill-missing {
+    @apply skill-badge bg-red-500/15 text-red-400 border border-red-500/20;
+  }
+  .input-field {
+    @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/30 transition-all;
+  }
+}
+
+/* Gradient mesh background */
+.bg-mesh {
+  background-color: #0a0d1a;
+  background-image:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(67,97,238,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 70%, rgba(114,9,183,0.08) 0%, transparent 70%);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.animate-fade-up   { animation: fadeUp 0.4s ease forwards; }
+.animate-fade-up-2 { animation: fadeUp 0.4s ease 0.1s forwards; opacity: 0; }
+.animate-fade-up-3 { animation: fadeUp 0.4s ease 0.2s forwards; opacity: 0; }
