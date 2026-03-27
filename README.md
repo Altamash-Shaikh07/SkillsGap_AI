@@ -153,3 +153,4 @@ Roadmap Generated    └─ NO  → Improvement Areas
 - **No Gemini API key?** The system uses a built-in mock LLM that generates realistic roadmaps and evaluates interviews — all features work offline.
 - **No MongoDB?** The system works fully without a database; session data is kept in memory during the session.
 - **Model download**: First run downloads `all-MiniLM-L6-v2` (~90MB). This is cached locally after the first download.
+>>>>>>> 3ff2ea0ffca67ad1e5b7b41a1e121d21d26b1330
