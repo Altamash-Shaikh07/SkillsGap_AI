@@ -112,45 +112,12 @@ FastAPI Backend (:8000)
 | LLM (Roadmap + Interview) | `Gemini 1.5 Flash` (free tier) |
 | Mock LLM Fallback | Built-in mock function (no API key needed) |
 
----
 
-## Decision Logic
-
-```
-Resume Uploaded
-      ↓
-Skill Gap Analysis
-      ↓
-Match ≥ 85%? ──YES──→ Mock Interview
-      │                     ↓
-      NO               Score > 85%?
-      ↓                ├─ YES → "Congratulations, Job Ready!"
-Roadmap Generated    └─ NO  → Improvement Areas
-```
-
----
-
-## Deployment
-
-```bash
-# Backend → Render (free tier)
-# 1. Push to GitHub
-# 2. Connect to render.com
-# 3. Set environment variables
-# 4. Deploy as Python web service
-
-# Frontend → Vercel (free tier)
-# 1. Push frontend/ to GitHub
-# 2. Import to vercel.com
-# 3. Set VITE_API_URL env var
-# 4. Deploy
-```
-
----
 
 ## Notes
 
 - **No Gemini API key?** The system uses a built-in mock LLM that generates realistic roadmaps and evaluates interviews — all features work offline.
 - **No MongoDB?** The system works fully without a database; session data is kept in memory during the session.
 - **Model download**: First run downloads `all-MiniLM-L6-v2` (~90MB). This is cached locally after the first download.
->>>>>>> 3ff2ea0ffca67ad1e5b7b41a1e121d21d26b1330
+
+Learn Built Upgrade :)
