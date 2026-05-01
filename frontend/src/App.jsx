@@ -1,33 +1,61 @@
-import React, { useState } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import UploadPage from './pages/UploadPage'
-import DashboardPage from './pages/DashboardPage'
-import RoadmapPage from './pages/RoadmapPage'
-import InterviewPage from './pages/InterviewPage'
-import Navbar from './components/Navbar'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 
-export default function App() {
-  // Global app state shared across pages
-  const [appState, setAppState] = useState({
-    sessionId: null,
-    resumeData: null,      // { skills, technologies, frameworks, projects }
-    analysisData: null,    // skill gap result
-    roadmapData: null,     // generated roadmap
-    selectedRole: null,
-  })
+import Auth from "./pages/Auth";
+import Upload from "./pages/upload";
+import Dashboard from "./pages/Dashboard";
+import Roadmap from "./pages/Roadmap";
+import Interview from "./pages/Interview";
+import Result from "./pages/Result";
 
-  const updateState = (patch) => setAppState(prev => ({ ...prev, ...patch }))
+function App() {
+  const [appState, setAppState] = useState({});
+
+  // ✅ FIXED: proper state merge
+  const updateState = (data) => {
+    setAppState((prev) => ({ ...prev, ...data }));
+  };
 
   return (
-    <div className="min-h-screen bg-mesh">
-      <Navbar appState={appState} />
+    <BrowserRouter>
       <Routes>
-        <Route path="/"          element={<UploadPage   appState={appState} updateState={updateState} />} />
-        <Route path="/dashboard" element={<DashboardPage appState={appState} updateState={updateState} />} />
-        <Route path="/roadmap"   element={<RoadmapPage  appState={appState} updateState={updateState} />} />
-        <Route path="/interview" element={<InterviewPage appState={appState} updateState={updateState} />} />
-        <Route path="*"          element={<Navigate to="/" />} />
+
+        {/* 🔐 Auth (Landing Page) */}
+        <Route path="/" element={<Auth />} />
+
+        {/* 📄 Upload */}
+        <Route
+          path="/upload"
+          element={<Upload appState={appState} updateState={updateState} />}
+        />
+
+        {/* 📊 Dashboard */}
+        <Route
+          path="/dashboard"
+          element={<Dashboard appState={appState} updateState={updateState} />}
+        />
+
+        {/* 🧠 Roadmap */}
+        <Route
+          path="/roadmap"
+          element={<Roadmap appState={appState} />}
+        />
+
+        {/* 🎤 Interview */}
+        <Route
+          path="/interview"
+          element={<Interview appState={appState} updateState={updateState} />}
+        />
+
+        {/* 🎯 Result */}
+        <Route
+          path="/result"
+          element={<Result appState={appState} />}
+        />
+
       </Routes>
-    </div>
-  )
+    </BrowserRouter>
+  );
 }
+
+export default App;

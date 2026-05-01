@@ -1,30 +1,22 @@
-import axios from 'axios'
+import axios from "axios";
 
-const api = axios.create({
-  baseURL: '/api',
-  timeout: 60000, // 60s for LLM calls
-})
+const API = "http://127.0.0.1:8000/api";
 
-// ── Resume ────────────────────────────────────────────────────────────────
-export const uploadResume = (file) => {
-  const form = new FormData()
-  form.append('file', file)
-  return api.post('/upload-resume', form, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  })
-}
+export const uploadResume = (file, token) => {
+  const formData = new FormData();
+  formData.append("file", file);
 
-// ── Roles ─────────────────────────────────────────────────────────────────
-export const getRoles = () => api.get('/roles')
+  return axios.post(`${API}/upload-resume`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
-// ── Analysis ─────────────────────────────────────────────────────────────
-export const analyzeSkills = (payload) => api.post('/analyze', payload)
-
-// ── Roadmap ───────────────────────────────────────────────────────────────
-export const generateRoadmap = (payload) => api.post('/generate-roadmap', payload)
-
-// ── Interview ─────────────────────────────────────────────────────────────
-export const startInterview = (payload) => api.post('/start-interview', payload)
-export const submitAnswer   = (payload) => api.post('/submit-answer', payload)
-
-export default api
+export const analyzeSkills = (data, token) => {
+  return axios.post(`${API}/analyze-skills`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
