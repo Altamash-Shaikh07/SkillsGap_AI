@@ -49,28 +49,32 @@ def embed_batch(texts: List[str]) -> List[List[float]]:
 
 def index_skills_if_empty(skills: List[str]):
     """
-    Index job role skills into ChromaDB if not already done.
-    Called once during analysis.
+    🔥 FIXED: Always re-index for new job role
     """
     collection = get_chroma_collection()
     if collection is None:
         return
 
-    # Check if already indexed
-    existing = collection.count()
-    if existing > 0:
-        return
+    try:
+        # 🚨 CLEAR OLD DATA (IMPORTANT FIX)
+        if collection.count() > 0:
+            collection.delete(where={})  # delete all existing vectors
 
-    logger.info(f"Indexing {len(skills)} skills into ChromaDB...")
-    embeddings = embed_batch(skills)
+        logger.info(f"Re-indexing {len(skills)} skills...")
 
-    collection.add(
-        ids=[f"skill_{i}" for i in range(len(skills))],
-        embeddings=embeddings,
-        documents=skills,
-        metadatas=[{"skill": s} for s in skills]
-    )
-    logger.info("Skills indexed in ChromaDB")
+        embeddings = embed_batch(skills)
+
+        collection.add(
+            ids=[f"skill_{i}" for i in range(len(skills))],
+            embeddings=embeddings,
+            documents=skills,
+            metadatas=[{"skill": s} for s in skills]
+        )
+
+        logger.info("Re-index complete")
+
+    except Exception as e:
+        logger.error(f"Indexing error: {e}")
 
 
 def find_similar_skill(
@@ -156,18 +160,7 @@ def categorize_skills(
     resume_skills: List[str],
     job_skills: List[str]
 ) -> dict:
-    """
-    Categorize resume skills vs job skills into HAVE / PARTIAL / MISSING.
-    
-    Returns:
-        {
-          "have": [...],
-          "partial": [...],
-          "missing": [...],
-          "match_percentage": float
-        }
-    """
-    # Index job skills in ChromaDB
+
     index_skills_if_empty(job_skills)
 
     resume_lower = {s.lower(): s for s in resume_skills}
@@ -176,45 +169,57 @@ def categorize_skills(
     have = []
     partial = []
     missing = []
-    covered_job_skills = set()
 
-    for job_skill_lower, job_skill in job_lower.items():
-        # ── EXACT MATCH ────────────────────────────────────────────────
-        if job_skill_lower in resume_lower:
+    matched_job_skills = set()
+
+    # ✅ LOOP OVER RESUME SKILLS (FIXED)
+    for resume_skill_lower, resume_skill in resume_lower.items():
+
+        # EXACT MATCH
+        if resume_skill_lower in job_lower:
+            job_skill = job_lower[resume_skill_lower]
+
             have.append({
                 "skill": job_skill,
                 "status": "have",
                 "match_score": 1.0,
-                "matched_with": resume_lower[job_skill_lower]
+                "matched_with": resume_skill
             })
-            covered_job_skills.add(job_skill_lower)
+
+            matched_job_skills.add(resume_skill_lower)
             continue
 
-        # ── SEMANTIC PARTIAL MATCH ─────────────────────────────────────
+        # SEMANTIC MATCH
         matched, score = find_similar_skill(
-            job_skill,
-            list(resume_lower.values()),
+            resume_skill,
+            list(job_lower.values()),
             threshold=PARTIAL_MATCH_THRESHOLD
         )
 
-        if matched and score >= PARTIAL_MATCH_THRESHOLD:
-            if score >= EXACT_MATCH_THRESHOLD:
-                have.append({
-                    "skill": job_skill,
-                    "status": "have",
-                    "match_score": score,
-                    "matched_with": matched
-                })
-            else:
-                partial.append({
-                    "skill": job_skill,
-                    "status": "partial",
-                    "match_score": score,
-                    "matched_with": matched
-                })
-            covered_job_skills.add(job_skill_lower)
-        else:
-            # ── MISSING ──────────────────────────────────────────────
+        if matched:
+            matched_lower = matched.lower()
+
+            if matched_lower not in matched_job_skills:
+                if score >= EXACT_MATCH_THRESHOLD:
+                    have.append({
+                        "skill": matched,
+                        "status": "have",
+                        "match_score": score,
+                        "matched_with": resume_skill
+                    })
+                else:
+                    partial.append({
+                        "skill": matched,
+                        "status": "partial",
+                        "match_score": score,
+                        "matched_with": resume_skill
+                    })
+
+                matched_job_skills.add(matched_lower)
+
+    # MISSING SKILLS
+    for job_skill_lower, job_skill in job_lower.items():
+        if job_skill_lower not in matched_job_skills:
             missing.append({
                 "skill": job_skill,
                 "status": "missing",
@@ -222,8 +227,7 @@ def categorize_skills(
                 "matched_with": None
             })
 
-    # Calculate match percentage
-    # have = full point, partial = half point
+    # MATCH %
     total = len(job_skills)
     score_points = len(have) + (len(partial) * 0.5)
     match_pct = round((score_points / total * 100) if total > 0 else 0, 1)

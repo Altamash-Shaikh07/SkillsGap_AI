@@ -72,8 +72,8 @@ export default function Upload({ appState, updateState }) {
         resumeSkills = ["JavaScript", "React", "Node.js"]
       }
 
-      // 🔹 STEP 2: Analyze
-   const res2 = await fetch("http://127.0.0.1:8000/api/analyze", {
+      // STEP 2: Analyze
+const res2 = await fetch("http://127.0.0.1:8000/api/analyze", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -81,27 +81,27 @@ export default function Upload({ appState, updateState }) {
   },
   body: JSON.stringify({
     session_id: resumeData.session_id,
-
     resume_skills: [
       ...(resumeData.skills || []),
       ...(resumeData.technologies || []),
       ...(resumeData.frameworks || [])
     ],
-
-    // ✅ ALWAYS send role if selected
-    job_role: selectedRole || undefined,
-
-    // ✅ ONLY send JD if user typed something meaningful
-    jd_text: jdText.trim().length > 20 ? jdText.trim() : undefined
+    job_role: selectedRole || "Full Stack Developer",
+    jd_text: jdText && jdText.trim().length > 50 ? jdText.trim() : undefined
   })
-})
+});
 
-      // 🔹 STEP 3: Store
-      updateState({
-        sessionId: resumeData.session_id,
-        analysisData,
-        selectedRole: selectedRole || "Custom JD"
-      })
+// 🔥 IMPORTANT LINE (YOU MISSED THIS)
+const analysisData = await res2.json()
+
+console.log("ANALYSIS DATA:", analysisData)
+
+// STEP 3: Store
+updateState({
+  sessionId: resumeData.session_id,
+  analysisData: analysisData,
+  selectedRole: selectedRole || "Full Stack Developer"
+})
 
       // 🔹 STEP 4: Navigate
       navigate('/dashboard')

@@ -52,20 +52,36 @@ export default function Dashboard({ appState, updateState }) {
     tab === 'Partial' ? partial_skills.map(s => ({ ...s, status: 'partial' })) :
     missing_skills.map(s => ({ ...s, status: 'missing' }))
 
-  const handleRoadmap = async () => {
+const handleRoadmap = async () => {
+  try {
     const res = await fetch("http://127.0.0.1:8000/api/generate-roadmap", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({ skill: job_role }),
+      body: JSON.stringify({
+        session_id: appState.sessionId,
+        job_role: appState.analysisData?.job_role,
+        missing_skills: appState.analysisData?.missing_skills?.map(s => s.skill) || [],
+        have_skills: appState.analysisData?.have_skills?.map(s => s.skill) || []
+      }),
     })
 
     const data = await res.json()
-    updateState({ roadmapData: data.roadmap })
+    console.log("ROADMAP RESPONSE:", data)
+
+    // ✅ STORE FULL RESPONSE
+    updateState({
+      roadmapData: data
+    })
+
     navigate("/roadmap")
+
+  } catch (err) {
+    console.error("Roadmap error:", err)
   }
+}
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">

@@ -19,6 +19,11 @@
 cd skillgap-ai/backend
 & "C:\Users\YOUR_USERNAME\AppData\Local\Programs\Python\Python311\python.exe" -m venv venv
 .\venv\Scripts\Activate
+pip install uvicorn fastapi pymongo python-dotenv passlib[bcrypt] python-jose
+pip uninstall bcrypt -y
+pip uninstall passlib -y
+pip install bcrypt==4.0.1
+pip install passlib[bcrypt]
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
@@ -28,7 +33,7 @@ uvicorn main:app --reload --port 8000
 http://127.0.0.1:8000/docs
 
 # Frontend (new terminal)
-
+npm install react-dropzone lucide-react
 cd skillgap-ai/frontend
 npm install
 npm run dev

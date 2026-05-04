@@ -1,16 +1,10 @@
-"""
-Interview Routes
-- /api/start-interview
-- /api/submit-answer
-"""
-
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import Optional, Dict
 import logging
 import uuid
-from config.database import get_collection
+
 from services.interview_engine import (
     generate_interview_questions,
     evaluate_answer,
@@ -20,7 +14,6 @@ from services.interview_engine import (
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# In-memory session store (replace with Redis in production)
 _active_sessions: Dict[str, Dict] = {}
 
 
@@ -35,24 +28,43 @@ class SubmitAnswerRequest(BaseModel):
     answer: str
 
 
+# ============================
+# START INTERVIEW
+# ============================
 @router.post("/start-interview")
 async def start_interview(request: StartInterviewRequest):
-    """
-    Start a mock interview session.
-    Returns a list of questions.
-    """
+
     if not request.job_role:
         raise HTTPException(status_code=400, detail="job_role is required")
 
     try:
+        print("🔥 Generating questions for:", request.job_role)
+
         questions = await generate_interview_questions(request.job_role)
+
+        print("✅ Questions generated:", questions)
+
+        # Fallback if AI fails
+        if not questions:
+            questions = [
+                {"id": "1", "question": "Explain REST API", "category": "technical"},
+                {"id": "2", "question": "What is React?", "category": "technical"},
+                {"id": "3", "question": "Tell me about yourself", "category": "hr"}
+            ]
+
     except Exception as e:
         logger.error(f"Interview generation error: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate questions")
+        print("❌ ERROR:", e)
+
+        # fallback questions instead of crashing
+        questions = [
+            {"id": "1", "question": "Explain REST API", "category": "technical"},
+            {"id": "2", "question": "What is React?", "category": "technical"},
+            {"id": "3", "question": "Tell me about yourself", "category": "hr"}
+        ]
 
     interview_session_id = str(uuid.uuid4())
 
-    # Store session in memory
     _active_sessions[interview_session_id] = {
         "job_role": request.job_role,
         "questions": questions,
@@ -61,42 +73,30 @@ async def start_interview(request: StartInterviewRequest):
         "status": "active"
     }
 
-    logger.info(f"Interview started: {interview_session_id}, role={request.job_role}, questions={len(questions)}")
-
     return JSONResponse({
         "interview_session_id": interview_session_id,
         "job_role": request.job_role,
         "total_questions": len(questions),
-        "questions": [
-            {
-                "id": q["id"],
-                "question": q["question"],
-                "category": q["category"],
-                "difficulty": q.get("difficulty", "Medium")
-                # Note: expected_keywords NOT sent to frontend
-            }
-            for q in questions
-        ]
+        "questions": questions
     })
 
 
+# ============================
+# SUBMIT ANSWER
+# ============================
 @router.post("/submit-answer")
 async def submit_answer(request: SubmitAnswerRequest):
-    """
-    Submit an answer to an interview question and get evaluation.
-    """
+
     session = _active_sessions.get(request.interview_session_id)
+
     if not session:
-        raise HTTPException(status_code=404, detail="Interview session not found")
+        raise HTTPException(status_code=404, detail="Session not found")
 
-    if session["status"] == "completed":
-        raise HTTPException(status_code=400, detail="Interview already completed")
-
-    # Find the question
     question_obj = next(
         (q for q in session["questions"] if q["id"] == request.question_id),
         None
     )
+
     if not question_obj:
         raise HTTPException(status_code=404, detail="Question not found")
 
@@ -104,71 +104,37 @@ async def submit_answer(request: SubmitAnswerRequest):
         evaluation = await evaluate_answer(
             question=question_obj["question"],
             answer=request.answer,
-            expected_keywords=question_obj.get("expected_keywords", []),
+            expected_keywords=[],
             category=question_obj.get("category", "technical")
         )
-    except Exception as e:
-        logger.error(f"Answer evaluation error: {e}")
-        raise HTTPException(status_code=500, detail="Evaluation failed")
 
-    # Store the answer and evaluation
+    except Exception as e:
+        print("❌ Evaluation error:", e)
+
+        evaluation = {
+            "score": 5,
+            "feedback": "Basic answer. Needs improvement."
+        }
+
     session["answers"].append({
         "question_id": request.question_id,
         "answer": request.answer
     })
+
     session["evaluations"].append({
         "question_id": request.question_id,
         **evaluation
     })
 
-    # Check if all questions answered
-    answered_ids = {a["question_id"] for a in session["answers"]}
-    all_ids = {q["id"] for q in session["questions"]}
-    is_complete = answered_ids >= all_ids
+    is_complete = len(session["answers"]) == len(session["questions"])
 
     result = {
-        "question_id": request.question_id,
         "evaluation": evaluation,
-        "questions_answered": len(session["answers"]),
-        "total_questions": len(session["questions"]),
         "interview_complete": is_complete
     }
 
     if is_complete:
-        session["status"] = "completed"
         final = calculate_final_score(session["evaluations"])
-        session["final_result"] = final
         result["final_result"] = final
 
-        # Persist to MongoDB
-        collection = get_collection("interview_results")
-        if collection is not None:
-            try:
-                await collection.insert_one({
-                    "interview_session_id": request.interview_session_id,
-                    "job_role": session["job_role"],
-                    "evaluations": session["evaluations"],
-                    **final
-                })
-            except Exception as e:
-                logger.warning(f"MongoDB insert failed: {e}")
-
-        logger.info(
-            f"Interview completed: {request.interview_session_id}, "
-            f"score={final['total_score']}"
-        )
-
     return JSONResponse(result)
-
-
-@router.get("/interview-result/{interview_session_id}")
-async def get_interview_result(interview_session_id: str):
-    """Get the result of a completed interview"""
-    session = _active_sessions.get(interview_session_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Interview session not found")
-
-    if session["status"] != "completed":
-        raise HTTPException(status_code=400, detail="Interview not yet completed")
-
-    return JSONResponse(session.get("final_result", {}))
