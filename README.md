@@ -120,7 +120,7 @@ FastAPI Backend (:8000)
 - **No MongoDB?** The system works fully without a database; session data is kept in memory during the session.
 - **Model download**: First run downloads `all-MiniLM-L6-v2` (~90MB). This is cached locally after the first download.
 
-Learn Built Upgrade :)
+# Learn Built Upgrade :)
 
 ## Deployment (Production)
 
